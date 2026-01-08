@@ -1,26 +1,23 @@
-# Tiny Transformer for Research Paper Text Modeling
+# Tiny Transformer for Short-Form Story Modeling
 
 ## Overview
 
-This repository contains a single Jupyter notebook `tinygpt.ipynb` implementing a small Transformer-based language model trained to generate short segments of research paper-style text. The project is exploratory and is intended to gain practical familiarity with Transformer architectures, tokenization pipelines, and end-to-end language model training in TensorFlow.
+This repository contains a single Jupyter notebook `tinygpt.ipynb` implementing a small Transformer-based language model trained to generate short-form narrative text. The project is exploratory and is intended to gain practical familiarity with Transformer architectures, tokenization pipelines, and end-to-end language model training in TensorFlow.
 
 The model is deliberately minimal. Design decisions favor simplicity and inspectability over performance, scale, or completeness. The notebook combines data preparation, model definition, training, and basic text generation in one place.
 
 ## Data Sources
 
-Two datasets are used for distinct purposes.
+A single dataset is used for both vocabulary construction and model training, with an explicit separation between training and validation data.
 
-### Vocabulary Construction
+### Vocabulary Construction and Training Data
 
-- **Brown Corpus (NLTK)**  
-  The Brown corpus is used only to construct a general English vocabulary. Tokens are extracted, cleaned, and indexed, and a small set of special tokens is added. The Brown corpus is not used for training or evaluation.
+- **TinyStories Dataset**  
+  The TinyStories dataset is used to construct the model vocabulary and to train the language model. The training set contains approximately 2.7 million short stories. A separate validation set is used for evaluation and contains approximately 1 percent of the training set size, or around 22,000 stories.
 
-### Training and Validation Data
+Text is tokenized and indexed to build a fixed vocabulary, with special tokens added for padding, unknown words, and sentence termination. The dataset is not randomly split within the notebook.
 
-- **ACL-OCL Dataset (Hugging Face)**  
-  Sentence-level text from NLP and computational linguistics research papers is used for model training. Sentences are tokenized, converted to integer sequences, padded or truncated to a fixed length, and split into training and validation sets.
-
-The training objective is standard next-token prediction on fixed-length sequences.
+The training objective is standard next-token prediction on fixed-length sequences. Generation is terminated using a special end-of-sentence `<EOS>` token.
 
 ## Model Architecture
 
@@ -28,7 +25,7 @@ The model is a small, decoder-only Transformer resembling a simplified GPT archi
 
 - Token embedding layer
 - Positional encoding
-- `n` Transformer blocks, each containing:
+- `n = 6` Transformer blocks, each containing:
   - Multi-head self-attention
   - Residual connections
   - Layer normalization
@@ -36,15 +33,18 @@ The model is a small, decoder-only Transformer resembling a simplified GPT archi
   - Dropout
 - Final dense layer projecting to vocabulary size
 
+The total parameter count of the model is approximately 58 million.
+
 ## Parameters and Configuration
 
 Key parameters defined in the notebook include:
 
 ### Tokenization and Vocabulary
 
-- Vocabulary size derived from the Brown corpus
-- Special tokens for padding, sentence start, and unknown words
-- Fixed maximum sequence length
+- Vocabulary size of 38,783 unique words plus special tokens
+- Special tokens for padding, end-of-sentence (`<EOS>`), and unknown words
+- Fixed maximum sequence length of 511 tokens  
+  Stories exceeding this length are truncated
 
 ### Model Hyperparameters
 
@@ -60,13 +60,13 @@ Key parameters defined in the notebook include:
 - Number of epochs
 - Optimizer (Adam)
 - Initial learning rate
-- Number of warmup steps ( for learning rate decay )
+- Number of warmup steps (for learning rate decay)
 
 ### Generation Parameters
 
 - Sampling temperature
-- Simple stopping condition based on punctuation (`.`) similar to how training was conducted.
+- Generation stopping condition based on the `<EOS>` token
 
 ## Scope
 
-This project is intended as a compact, self-contained example of implementing and training a Transformer language model on real academic text.
+This project is intended as a compact, self-contained example of implementing and training a Transformer language model on a narrative dataset.
